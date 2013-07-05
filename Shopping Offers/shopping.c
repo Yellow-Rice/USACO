@@ -66,12 +66,12 @@ int main()
         price[product[i][0]] = product[i][2];
     }
     fclose(fin);
-    
+
     search(0, 0);
-    
+
     FILE *fout = fopen("shopping.out", "w");
     fprintf(fout, "%d\n", min);
     fclose(fout);
-    
+
     exit(0);
 }
