@@ -1,0 +1,9 @@
+Polygon Game [1998 IOI]
+Imagine a regular N-gon. Put numbers on nodes, either and the operators `+' or `*' on the edges. The first move is to remove an edge. After that, combine (e.g., evaluate the simple term) across edges, replacing the edge and end points with node with value equal to value of end point combined by operations, for example: 
+
+  ...-- 3 --+-- 5 --*-- 7 --...
+  ...----- 8 ----*----- 7 --...
+  ...-------- 56 -----------...
+Given a labelled N-gon, maximize the final value computed.
+
+maximum[M -> N] = MAX{maximum[M -> k] (operator) maximum[k + 1 -> N]}, for k = M -> N - 1.

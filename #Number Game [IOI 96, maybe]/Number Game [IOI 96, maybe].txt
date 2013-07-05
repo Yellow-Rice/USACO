@@ -1,0 +1,5 @@
+Number Game [IOI 96, maybe]
+
+Given a sequence of no more than 100 integers (-32000..32000), two opponents alternate turns removing the leftmost or rightmost number from a sequence. Each player's score at the end of the game is the sum of those numbers he or she removed. Given a sequence, determine the maximum winning score for the first player, assuming the second player plays optimally.
+
+http://olympiads.win.tue.nl/ioi/ioi96/contest/ioi96g.html
