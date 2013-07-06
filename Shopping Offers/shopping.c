@@ -97,7 +97,7 @@ int main()
     index[4] = (4 < b) ? product[4][1] : 0;
 
     FILE *fout = fopen("shopping.out", "w");
-    fprintf(stdout, "%d\n", cost[index[0]][index[1]][index[2]][index[3]][index[4]]);
+    fprintf(fout, "%d\n", cost[index[0]][index[1]][index[2]][index[3]][index[4]]);
     fclose(fout);
 
     exit(0);
