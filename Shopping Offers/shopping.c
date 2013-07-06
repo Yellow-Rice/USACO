@@ -65,36 +65,6 @@ void init()
             }
         }
     }
-    /*for (index[0] = 1; index[0] < 6; ++index[0]) {
-        index[1] = index[2] = index[3] = index[4] = 0;
-        calc();
-        for (index[1] = 1; index[1] < 6; ++index[1]) {
-            index[2] = index[3] = index[4] = 0;
-            calc();
-            for (index[2] = 1; index[2] < 6; ++index[2]) {
-                index[3] = index[4] = 0;
-                calc();
-                for (index[3] = 1; index[3] < 6; ++index[3]) {
-                    index[4] = 0;
-                    calc();
-                    for (index[4] = 1; index[4] < 6; ++index[4]) {
-                        calc();
-                    }
-                }
-            }
-        }
-    }*/
-    /*for (index[4] = 0; index[4] < 6; ++index[4]) {
-        for (index[3] = 0; index[3] < 6; ++index[3]) {
-            for (index[2] = 0; index[2] < 6; ++index[2]) {
-                for (index[1] = 0; index[1] < 6; ++index[1]) {
-                    for (index[0] = 0; index[0] < 6; ++index[0]) {
-                        calc();
-                    }
-                }
-            }
-        }
-    }*/
 }
 
 int main()
@@ -127,7 +97,6 @@ int main()
     index[4] = (4 < b) ? product[4][1] : 0;
 
     FILE *fout = fopen("shopping.out", "w");
-    fprintf(fout, "%d\n", cost[index[0]][index[1]][index[2]][index[3]][index[4]]);
     fprintf(stdout, "%d\n", cost[index[0]][index[1]][index[2]][index[3]][index[4]]);
     fclose(fout);
 
