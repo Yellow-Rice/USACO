@@ -15,7 +15,8 @@ int product[5][3];
 int price[1000];
 int quantity[1000];
 
-//add start to reduce repeated conditions, but still TLE
+//add start to reduce repeated conditions, but still TLE...
+//maybe the limit of recursion
 void search(int sum, int start)
 {
     int j;
