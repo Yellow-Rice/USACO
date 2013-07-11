@@ -94,10 +94,10 @@ int find_cost(int col, int row)
     int r, c;
     cost[col][row] = 0;
     for (k = 0; k < num; ++k) {
-        //printf("knight %d %d: ", knights[k][0], knights[k][1]);
+        //printf("knight %d %d:\n", knights[k][0], knights[k][1]);
         if (knights[k][0] == col && knights[k][1] == row) {
             //printf("count[col][row] = %d\n", 0);
-            if (min < dist_to_king(col, row)) {
+            if (min > dist_to_king(col, row)) {
                 min = dist_to_king(col, row);
             }
             continue;
@@ -132,6 +132,7 @@ int find_cost(int col, int row)
         cost[col][row] += count[col][row];
         //printf("count[col][row] = %d\n", count[col][row]);
     }
+    //printf("min = %d\n", min);
     cost[col][row] += min;
     return cost[col][row];
 }
@@ -147,7 +148,7 @@ int init()
     int ret;
     for (i = 1; i <= C; ++i) {
         for (j = 1; j <= R; ++j) {
-            //printf("round %d %d\n", i, j);
+            //printf("dest %d %d\n", i, j);
             ret = find_cost(i, j);
             //printf("cost: %d\n\n", ret);
             if (ret < min) {
@@ -181,7 +182,7 @@ int main()
     
     FILE *fout = fopen("camelot.out", "w");
     fprintf(fout, "%d\n", ans);
-    fprintf(stdout, "%d\n", ans);
+    //fprintf(stderr, "%d\n", ans);
     fclose(fout);
     
     exit(0);
