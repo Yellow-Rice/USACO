@@ -139,6 +139,9 @@ int find_cost(int col, int row)
 // Calculate the minimum total steps cell by cell.
 int init()
 {
+    if (0 == num) {
+        return 0;
+    }
     int i, j;
     int min = INT_MAX;
     int ret;
