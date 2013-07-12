@@ -45,12 +45,9 @@ void pop(int *col, int *row)
 int R, C;
 int king[2]; //{column, row}
 int knights[26 * 30][2];
-int count[27][31];
-int steps[27][31];
-int cost[27][31];
-//int prev[27][31];
 int num = 0;
 
+int kdist[27][31];
 int dist_to_king(int col, int row)
 {
     int d1 = col - king[0];
@@ -59,103 +56,138 @@ int dist_to_king(int col, int row)
     d2 = (d2 >= 0) ? d2 : -d2;
     return (d1 > d2) ? d1 : d2;
 }
+int matrix[27][31][27][31]; //start_col, start_row, dest_col, dest_row
+int total[27][31]; //steps of every knight move to the cell
 
-int finish = INT_MAX;
-
-void knight_move(const int c2, const int r2, const int d_col, const int d_row, const int s_col, const int s_row)
+void init_matrix(int col, int row)
 {
-    if (c2 > 0 && r2 > 0 && c2 <= C && r2 <= R && count[c2][r2] > count[s_col][s_row]) {
-        if (count[c2][r2] == count[s_col][s_row] + 1 && steps[s_col][s_row] < steps[c2][r2]) {
-            steps[c2][r2] = steps[s_col][s_row];
-            return ;
-        }
-        if (steps[s_col][s_row] <= dist_to_king(c2, r2)) {
-            steps[c2][r2] = steps[s_col][s_row];
-        }
-        else {
-            steps[c2][r2] = dist_to_king(c2, r2);
-        }
-        count[c2][r2] = count[s_col][s_row] + 1;
-        if (d_col == c2 && d_row == r2) {
-            finish = count[c2][r2];
-            //printf("count = %d, steps = %d\n", count[c2][r2], steps[c2][r2]);
-        }
-        else {
-            push(c2, r2);
-            //printf("push(%d, %d)\n", c2, r2);
-        }
-    }
-}
-
-int find_cost(int col, int row)
-{
-    int i, j, k;
-    int min = INT_MAX;
-    int r, c;
-    cost[col][row] = 0;
-    for (k = 0; k < num; ++k) {
-        //printf("knight %d %d:\n", knights[k][0], knights[k][1]);
-        if (knights[k][0] == col && knights[k][1] == row) {
-            //printf("count[col][row] = %d\n", 0);
-            if (min > dist_to_king(col, row)) {
-                min = dist_to_king(col, row);
-            }
-            continue;
-        }
-        for (i = 1; i <= C; ++i) {
-            for (j = 1; j <= R; ++j) {
-                steps[i][j] = dist_to_king(i, j);
-                count[i][j] = INT_MAX - 1;
-            }
-        }
-        clear();
-        finish = INT_MAX;
-        push(knights[k][0], knights[k][1]);
-        count[knights[k][0]][knights[k][1]] = 0;
-        while (q_size) {
-            pop(&c, &r);
-            if (count[c][r] >= finish) {
-                break;
-            }
-            knight_move(c - 2, r + 1, col, row, c, r);
-            knight_move(c - 1, r + 2, col, row, c, r);
-            knight_move(c + 1, r + 2, col, row, c, r);
-            knight_move(c + 2, r + 1, col, row, c, r);
-            knight_move(c + 2, r - 1, col, row, c, r);
-            knight_move(c + 1, r - 2, col, row, c, r);
-            knight_move(c - 1, r - 2, col, row, c, r);
-            knight_move(c - 2, r - 1, col, row, c, r);
-        }
-        if (steps[col][row] < min) {
-            min = steps[col][row];
-        }
-        cost[col][row] += count[col][row];
-        //printf("count[col][row] = %d\n", count[col][row]);
-    }
-    //printf("min = %d\n", min);
-    cost[col][row] += min;
-    return cost[col][row];
-}
-
-// Calculate the minimum total steps cell by cell.
-int init()
-{
-    if (0 == num) {
-        return 0;
-    }
     int i, j;
-    int min = INT_MAX;
-    int ret;
+    int count;
+    int c, r;
     for (i = 1; i <= C; ++i) {
         for (j = 1; j <= R; ++j) {
-            //printf("dest %d %d\n", i, j);
-            ret = find_cost(i, j);
-            //printf("cost: %d\n\n", ret);
-            if (ret < min) {
-                min = ret;
+            matrix[col][row][i][j] = INT_MAX;
+        }
+    }
+    matrix[col][row][col][row] = 0;
+    clear();
+    push(col, row);
+    while(q_size) {
+        pop(&c, &r);
+        count = matrix[col][row][c][r] + 1;
+        if (c - 2 > 0   && r - 1 > 0    && count < matrix[col][row][c - 2][r - 1]) {matrix[col][row][c - 2][r - 1] = count; push(c - 2, r - 1);}
+        if (c - 2 > 0   && r + 1 <= R   && count < matrix[col][row][c - 2][r + 1]) {matrix[col][row][c - 2][r + 1] = count; push(c - 2, r + 1);}
+        if (c - 1 > 0   && r - 2 > 0    && count < matrix[col][row][c - 1][r - 2]) {matrix[col][row][c - 1][r - 2] = count; push(c - 1, r - 2);}
+        if (c - 1 > 0   && r + 2 <= R   && count < matrix[col][row][c - 1][r + 2]) {matrix[col][row][c - 1][r + 2] = count; push(c - 1, r + 2);}
+        if (c + 1 <= C  && r - 2 > 0    && count < matrix[col][row][c + 1][r - 2]) {matrix[col][row][c + 1][r - 2] = count; push(c + 1, r - 2);}
+        if (c + 1 <= C  && r + 2 <= R   && count < matrix[col][row][c + 1][r + 2]) {matrix[col][row][c + 1][r + 2] = count; push(c + 1, r + 2);}
+        if (c + 2 <= C  && r - 1 > 0    && count < matrix[col][row][c + 2][r - 1]) {matrix[col][row][c + 2][r - 1] = count; push(c + 2, r - 1);}
+        if (c + 2 <= C  && r + 1 <= R   && count < matrix[col][row][c + 2][r + 1]) {matrix[col][row][c + 2][r + 1] = count; push(c + 2, r + 1);}
+    }
+}
+
+// Initilize kdist[][], matrix[][][][] for further use
+void init()
+{
+    int i, j, k, l;
+    for (i = 1; i <= C; ++i) {
+        for (j = 1; j <= R; ++j) {
+            // find the min dist between king with every cell
+            kdist[i][j] = dist_to_king(i, j);
+            // find the min dist between every 2 cells
+            init_matrix(i, j);
+            // find the total steps for all knights moving to every cell
+            total[i][j] = 0;
+            for (k = 0; k < num; ++k) {
+                total[i][j] += matrix[i][j][knights[k][0]][knights[k][1]];
             }
         }
     }
+}
+
+int calc(int col, int row)
+{
+    int min = INT_MAX;
+    int cost, temp;
+    int i, j, k;
+    int left, right, top, bottom;
+    int margin = 1;
+    //enumerate knight who pick up the king
+    for (k = 0; k < num; ++k) {
+        temp = total[col][row] - matrix[col][row][knights[k][0]][knights[k][1]];
+        //enumerate meeting place of the king and the knight
+        //we only search the rectangle that is 2 unit larger than the smallest rectangle that can contain dest, king, and knight
+        left = (king[0] < knights[k][0]) ? king[0] : knights[k][0];
+        left = (left < col) ? left : col;
+        if (left - margin <= 1) {
+            left = 1;
+        }
+        else {
+            left -= margin;
+        }
+        
+        right = (king[0] > knights[k][0]) ? king[0] : knights[k][0];
+        right = (right > col) ? right : col;
+        if (right + margin >= C) {
+            right = C;
+        }
+        else {
+            right += margin;
+        }
+        
+        top = (king[1] < knights[k][1]) ? king[1] : knights[k][1];
+        top = (top < row) ? top : row;
+        if (top - margin <= 1) {
+            top = 1;
+        }
+        else {
+            top -= margin;
+        }
+        
+        bottom = (king[1] > knights[k][1]) ? king[1] : knights[k][1];
+        bottom = (bottom > row) ? bottom : row;
+        if (bottom + margin >= R) {
+            bottom = R;
+        }
+        else {
+            bottom += margin;
+        }
+        
+        for (i = left; i <= right; ++i) {
+            for (j = top; j <= bottom; ++j) {
+                cost = temp;
+                cost += kdist[i][j];
+                cost += matrix[i][j][knights[k][0]][knights[k][1]];
+                cost += matrix[col][row][i][j];
+                if (cost < min) {
+                    min = cost;
+                }
+            }
+        }
+    }
+    return min;
+}
+
+int find_ans()
+{
+    if (num == 0) {
+        return 0;
+    }
+    
+    init();
+    
+    int i, j;
+    int min = INT_MAX;
+    int temp = 0;
+    for (i = 1; i < C; ++i) {
+        for (j = 1; j < R; ++j) {
+            temp = calc(i, j);
+            if (min > temp) {
+                min = temp;
+            }
+        }
+    }
+    
     return min;
 }
 
@@ -163,22 +195,19 @@ int main()
 {
     char col;
     int row;
-    int ans;
     FILE *fin = fopen("camelot.in", "r");
     fscanf(fin, "%d %d\n", &R, &C);
-    //printf("%d %d\n", R, C);
     fscanf(fin, "%c %d\n", &col, &row);
     king[0] = col - 'A' + 1;
     king[1] = row;
-    //printf("%d %d\n", king[0], king[1]);
     while (2 == fscanf(fin, "%c %d\n", &col, &row)) {
         knights[num][0] = col - 'A' + 1;
         knights[num++][1] = row;
-        //printf("%d %d\n", knights[num - 1][0], knights[num - 1][1]);
     }
     fclose(fin);
     
-    ans = init();
+    int ans;
+    ans = find_ans();
     
     FILE *fout = fopen("camelot.out", "w");
     fprintf(fout, "%d\n", ans);
