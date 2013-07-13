@@ -100,10 +100,6 @@ void init()
             // find the total steps for all knights moving to every cell
             total[i][j] = 0;
             for (k = 0; k < num; ++k) {
-                if (matrix[i][j][knights[k][0]][knights[k][1]] == INT_MAX) {
-                    total[i][j] = INT_MAX;
-                    break;
-                }
                 total[i][j] += matrix[i][j][knights[k][0]][knights[k][1]];
             }
         }
@@ -112,73 +108,58 @@ void init()
 
 int calc(int col, int row)
 {
-    if (total[col][row] == INT_MAX) {
-        return INT_MAX;
-    }
-    int min = total[col][row] + kdist[col][row];
+    int min = INT_MAX;
     int cost, temp;
     int i, j, k;
     int left, right, top, bottom;
+    float dtop, dbottom;
     int margin = 2;
-    int margin_k = 4;
     //enumerate knight who pick up the king
     for (k = 0; k < num; ++k) {
-        //cut knights that can never move to dest
-        if (matrix[col][row][knights[k][0]][knights[k][1]] == INT_MAX) {
+        /*
+         *enumerate meeting place of the king and the knight
+         *in previous TLE file, we search the rectangle that is "margin" unit larger than the smallest rectangle that can contain dest, king, and knight
+         *now, we consider the triangle formed by dest, king, and knight
+         *Since it is too complicated, I give up...
+         */
+        //if king at dest or at the same position as knight, cost = total[col][row]
+        if ((col == king[0] && row == king[1]) || (col == knights[k][0] && row == knights[k][1])) {
+            if (total[col][row] < min) {
+                min = total[col][row];
+            }
             continue;
         }
-        //cut some knights
-        if (king[0] <= col && knights[k][0] > col + margin_k) {
-            continue;
-        }
-        if (king[0] >= col && knights[k][0] < col - margin_k) {
-            continue;
-        }
-        if (king[1] <= row && knights[k][1] > row + margin_k) {
-            continue;
-        }
-        if (king[1] >= row && knights[k][1] < row - margin_k) {
+        //if king, knight and dest on the same line
+        if (((king[0] - col) * (row - knights[k][1])) == ((king[1] - row) * (col - knights[k][0])) {
+            if (king[0] < knights[k][0]) {
+                if (king[0] < col) {
+                    left = king[0] - margin;
+                    if (king[1] < row) {
+                        top = king[1] - margin;
+                    }
+                    else {
+                        bottom = king[1] + margin;
+                    }
+                    if (col < knight[k][0]) {
+                        
+                    }
+                }
+                else {
+                    left = col - margin;
+                    if (row < king[1]) {
+                        top = row - margin;
+                    }
+                    else {
+                        bottom = row + margin;
+                    }
+                }
+            }
+            else {
+                
+            }
             continue;
         }
         temp = total[col][row] - matrix[col][row][knights[k][0]][knights[k][1]];
-        //enumerate meeting place of the king and the knight
-        //we only search the rectangle that is "margin" unit larger than the smallest rectangle that can contain dest, king, and knight
-        left = (king[0] < knights[k][0]) ? king[0] : knights[k][0];
-        left = (left < col) ? left : col;
-        if (left - margin <= 1) {
-            left = 1;
-        }
-        else {
-            left -= margin;
-        }
-        
-        right = (king[0] > knights[k][0]) ? king[0] : knights[k][0];
-        right = (right > col) ? right : col;
-        if (right + margin >= C) {
-            right = C;
-        }
-        else {
-            right += margin;
-        }
-        
-        top = (king[1] < knights[k][1]) ? king[1] : knights[k][1];
-        top = (top < row) ? top : row;
-        if (top - margin <= 1) {
-            top = 1;
-        }
-        else {
-            top -= margin;
-        }
-        
-        bottom = (king[1] > knights[k][1]) ? king[1] : knights[k][1];
-        bottom = (bottom > row) ? bottom : row;
-        if (bottom + margin >= R) {
-            bottom = R;
-        }
-        else {
-            bottom += margin;
-        }
-        
         for (i = left; i <= right; ++i) {
             for (j = top; j <= bottom; ++j) {
                 if (matrix[i][j][knights[k][0]][knights[k][1]] == INT_MAX || matrix[col][row][i][j] == INT_MAX) {
@@ -188,9 +169,6 @@ int calc(int col, int row)
                 cost += kdist[i][j];
                 cost += matrix[i][j][knights[k][0]][knights[k][1]];
                 cost += matrix[col][row][i][j];
-                if (cost == total[col][row]) {
-                    return cost;
-                }
                 if (cost < min) {
                     min = cost;
                 }
@@ -211,8 +189,8 @@ int find_ans()
     int i, j;
     int min = INT_MAX;
     int temp = 0;
-    for (i = 1; i <= C; ++i) {
-        for (j = 1; j <= R; ++j) {
+    for (i = 1; i < C; ++i) {
+        for (j = 1; j < R; ++j) {
             temp = calc(i, j);
             if (min > temp) {
                 min = temp;

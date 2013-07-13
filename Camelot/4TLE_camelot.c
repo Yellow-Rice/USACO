@@ -100,10 +100,6 @@ void init()
             // find the total steps for all knights moving to every cell
             total[i][j] = 0;
             for (k = 0; k < num; ++k) {
-                if (matrix[i][j][knights[k][0]][knights[k][1]] == INT_MAX) {
-                    total[i][j] = INT_MAX;
-                    break;
-                }
                 total[i][j] += matrix[i][j][knights[k][0]][knights[k][1]];
             }
         }
@@ -112,34 +108,13 @@ void init()
 
 int calc(int col, int row)
 {
-    if (total[col][row] == INT_MAX) {
-        return INT_MAX;
-    }
-    int min = total[col][row] + kdist[col][row];
+    int min = INT_MAX;
     int cost, temp;
     int i, j, k;
     int left, right, top, bottom;
-    int margin = 2;
-    int margin_k = 4;
+    int margin = 0;
     //enumerate knight who pick up the king
     for (k = 0; k < num; ++k) {
-        //cut knights that can never move to dest
-        if (matrix[col][row][knights[k][0]][knights[k][1]] == INT_MAX) {
-            continue;
-        }
-        //cut some knights
-        if (king[0] <= col && knights[k][0] > col + margin_k) {
-            continue;
-        }
-        if (king[0] >= col && knights[k][0] < col - margin_k) {
-            continue;
-        }
-        if (king[1] <= row && knights[k][1] > row + margin_k) {
-            continue;
-        }
-        if (king[1] >= row && knights[k][1] < row - margin_k) {
-            continue;
-        }
         temp = total[col][row] - matrix[col][row][knights[k][0]][knights[k][1]];
         //enumerate meeting place of the king and the knight
         //we only search the rectangle that is "margin" unit larger than the smallest rectangle that can contain dest, king, and knight
@@ -188,9 +163,6 @@ int calc(int col, int row)
                 cost += kdist[i][j];
                 cost += matrix[i][j][knights[k][0]][knights[k][1]];
                 cost += matrix[col][row][i][j];
-                if (cost == total[col][row]) {
-                    return cost;
-                }
                 if (cost < min) {
                     min = cost;
                 }
@@ -211,8 +183,8 @@ int find_ans()
     int i, j;
     int min = INT_MAX;
     int temp = 0;
-    for (i = 1; i <= C; ++i) {
-        for (j = 1; j <= R; ++j) {
+    for (i = 1; i < C; ++i) {
+        for (j = 1; j < R; ++j) {
             temp = calc(i, j);
             if (min > temp) {
                 min = temp;
