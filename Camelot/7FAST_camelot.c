@@ -56,8 +56,7 @@ int dist_to_king(int col, int row)
     d2 = (d2 >= 0) ? d2 : -d2;
     return (d1 > d2) ? d1 : d2;
 }
-int matrix[27][31][27][31]; //dest_col, dest_row, start_col, start_row
-int kmatrix[27][31][27][31]; //dest_col, dest_row, knight_col, kngiht_row
+int matrix[27][31][27][31]; //start_col, start_row, dest_col, dest_row
 int total[27][31]; //steps of every knight move to the cell
 
 //BFS
@@ -88,36 +87,7 @@ void init_matrix(int col, int row)
     }
 }
 
-void init_kmatrix(int col, int row)
-{
-    int i, j;
-    int count;
-    int c, r;
-    for (i = 1; i <= C; ++i) {
-        for (j = 1; j <= R; ++j) {
-            kmatrix[col][row][i][j] = INT_MAX;
-        }
-    }
-    //kmatrix[col][row][king[0]][king[1]] = matrix[col][row][king[0]][king[1]];
-    kmatrix[col][row][col][row] = kdist[col][row];
-    clear();
-    //push(king[0], king[1]);
-    push(col, row);
-    while(q_size) {
-        pop(&c, &r);
-        count = kmatrix[col][row][c][r] + 1;
-        if (c - 2 > 0   && r - 1 > 0    && count < kmatrix[col][row][c - 2][r - 1]) {kmatrix[col][row][c - 2][r - 1] = (count < kdist[c - 2][r - 1] + matrix[col][row][c - 2][r - 1]) ? (count) : (kdist[c - 2][r - 1] + matrix[col][row][c - 2][r - 1]); push(c - 2, r - 1);}
-        if (c - 2 > 0   && r + 1 <= R   && count < kmatrix[col][row][c - 2][r + 1]) {kmatrix[col][row][c - 2][r + 1] = (count < kdist[c - 2][r + 1] + matrix[col][row][c - 2][r + 1]) ? (count) : (kdist[c - 2][r + 1] + matrix[col][row][c - 2][r + 1]); push(c - 2, r + 1);}
-        if (c - 1 > 0   && r - 2 > 0    && count < kmatrix[col][row][c - 1][r - 2]) {kmatrix[col][row][c - 1][r - 2] = (count < kdist[c - 1][r - 2] + matrix[col][row][c - 1][r - 2]) ? (count) : (kdist[c - 1][r - 2] + matrix[col][row][c - 1][r - 2]); push(c - 1, r - 2);}
-        if (c - 1 > 0   && r + 2 <= R   && count < kmatrix[col][row][c - 1][r + 2]) {kmatrix[col][row][c - 1][r + 2] = (count < kdist[c - 1][r + 2] + matrix[col][row][c - 1][r + 2]) ? (count) : (kdist[c - 1][r + 2] + matrix[col][row][c - 1][r + 2]); push(c - 1, r + 2);}
-        if (c + 1 <= C  && r - 2 > 0    && count < kmatrix[col][row][c + 1][r - 2]) {kmatrix[col][row][c + 1][r - 2] = (count < kdist[c + 1][r - 2] + matrix[col][row][c + 1][r - 2]) ? (count) : (kdist[c + 1][r - 2] + matrix[col][row][c + 1][r - 2]); push(c + 1, r - 2);}
-        if (c + 1 <= C  && r + 2 <= R   && count < kmatrix[col][row][c + 1][r + 2]) {kmatrix[col][row][c + 1][r + 2] = (count < kdist[c + 1][r + 2] + matrix[col][row][c + 1][r + 2]) ? (count) : (kdist[c + 1][r + 2] + matrix[col][row][c + 1][r + 2]); push(c + 1, r + 2);}
-        if (c + 2 <= C  && r - 1 > 0    && count < kmatrix[col][row][c + 2][r - 1]) {kmatrix[col][row][c + 2][r - 1] = (count < kdist[c + 2][r - 1] + matrix[col][row][c + 2][r - 1]) ? (count) : (kdist[c + 2][r - 1] + matrix[col][row][c + 2][r - 1]); push(c + 2, r - 1);}
-        if (c + 2 <= C  && r + 1 <= R   && count < kmatrix[col][row][c + 2][r + 1]) {kmatrix[col][row][c + 2][r + 1] = (count < kdist[c + 2][r + 1] + matrix[col][row][c + 2][r + 1]) ? (count) : (kdist[c + 2][r + 1] + matrix[col][row][c + 2][r + 1]); push(c + 2, r + 1);}
-    }
-}
-
-// Iniatilize kdist[][], matrix[][][][] for further use
+// Initilize kdist[][], matrix[][][][] for further use
 void init()
 {
     int i, j, k, l;
@@ -138,11 +108,6 @@ void init()
             }
         }
     }
-    for (i = 1; i <= C; ++i) {
-        for (j = 1; j <= R; ++j) {
-            init_kmatrix(i, j);
-        }
-    }
 }
 
 int calc(int col, int row)
@@ -156,8 +121,29 @@ int calc(int col, int row)
     int left, right, top, bottom;
     //enumerate knight who picks up the king
     for (k = 0; k < num; ++k) {
-        if (total[col][row] - matrix[col][row][knights[k][0]][knights[k][1]] + kmatrix[col][row][knights[k][0]][knights[k][1]] < min) {
-            min = total[col][row] - matrix[col][row][knights[k][0]][knights[k][1]] + kmatrix[col][row][knights[k][0]][knights[k][1]];
+        //This idea is from internet
+        //We assume that the king moves at most 4 steps
+        left = (king[0] > 4) ? king[0] - 4 : 1;
+        right = (king[0] <= C - 4) ? king[0] + 4 : C;
+        top = (king[1] > 4) ? king[1] - 4 : 1;
+        bottom = (king[1] <= R - 4) ? king[1] + 4 : R;
+        temp = total[col][row] - matrix[col][row][knights[k][0]][knights[k][1]];
+        for (i = left; i <= right; ++i) {
+            for (j = top; j <= bottom; ++j) {
+                if (matrix[i][j][knights[k][0]][knights[k][1]] == INT_MAX || matrix[col][row][i][j] == INT_MAX) {
+                    continue;
+                }
+                cost = temp;
+                cost += kdist[i][j];
+                cost += matrix[i][j][knights[k][0]][knights[k][1]];
+                cost += matrix[col][row][i][j];
+                if (cost == total[col][row]) {
+                    return cost;
+                }
+                if (cost < min) {
+                    min = cost;
+                }
+            }
         }
     }
     return min;
